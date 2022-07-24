@@ -1,0 +1,18 @@
+{
+  "name": "rangetree",
+  "version": "1.0.0",
+  "description": "Data structure for optimally querying ranges, while tracking historical queries so that intervals are not duplicated",
+  "main": "index.ts",
+  "scripts": {
+    "test": "ts-node tests.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com/lsnow99/rangetree"
+  },
+  "author": "Logan Snow",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^4.7.4"
+  }
+}
