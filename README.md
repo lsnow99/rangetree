@@ -7,7 +7,7 @@ A range tree is a data structure that stores queries for ranges, such as those a
 1. Clone the repository
 2. `npm install`
 
-To run tests defined in `tests.ts`, do `npm test`
+To run tests defined in `rangetree.test.ts`, do `npm test`
 
 ## Definition
 
@@ -27,8 +27,6 @@ Suppose the range tree currently holds the following intervals of integers befor
 - Query 3: `insert([25, 28])` -> should return {} (empty list) since the interval is already fully contained in the data structure. The range tree now contains {[0, 10], [20, 30], [50, 70]}
 - Query 4: `insert([15, 35])` -> should return {[15, 20], [30, 35]} since both these intervals are needed to fulfill the query. The range tree now contains {[0, 10], [15, 35], [50, 70]}
 - Query 5: `insert([0, 100])` -> should return {[10, 20], [30, 50], [70, 100]}. The range tree now contains {[0, 100]}
-
-To run these examples, do `npm test`
 
 ## Proof
 

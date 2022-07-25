@@ -3,6 +3,9 @@ export class Interval {
   maxVal: number;
 
   constructor(minVal: number, maxVal: number) {
+	if (minVal > maxVal) {
+		throw `min val > max val: ${minVal} > ${maxVal}`
+	}
     this.minVal = minVal;
     this.maxVal = maxVal;
   }
@@ -17,9 +20,9 @@ export class Interval {
 }
 
 enum ComingFrom {
-	Left = "left",
-	Right = "right",
-	None = ""
+  Left = "left",
+  Right = "right",
+  None = "",
 }
 
 enum Case {
@@ -29,6 +32,7 @@ enum Case {
   Four = 4,
   Five = 5,
   Six = 6,
+  Seven = 7
 }
 
 type InsertResult = {
@@ -37,19 +41,27 @@ type InsertResult = {
   case: Case;
 };
 
+interface IntervalArgsWithInterval {
+	interval: Interval
+	a?: never
+	b?: never
+}
+
+interface IntervalArgsWithBounds {
+	a: number
+	b: number
+	interval?: never
+}
+
+export type IntervalArgs = IntervalArgsWithInterval | IntervalArgsWithBounds
+
 export class IntervalNode {
   interval: Interval;
-  leftNode: IntervalNode | null;
-  rightNode: IntervalNode | null;
+  leftNode: IntervalNode | null = null;
+  rightNode: IntervalNode | null = null;
 
-  constructor(
-    leftNode: IntervalNode | null,
-    rightNode: IntervalNode | null,
-    interval: Interval
-  ) {
-    this.leftNode = leftNode;
-    this.rightNode = rightNode;
-    this.interval = interval;
+  constructor({interval, a, b}: IntervalArgs) {
+    this.interval = interval ?? new Interval(a, b);
   }
 
   contains(x: number): boolean {
@@ -61,9 +73,10 @@ export class IntervalNode {
     return true;
   }
 
-  insert(interval: Interval, comingFrom=ComingFrom.None): InsertResult {
+  insert({interval, a, b}: IntervalArgs, comingFrom = ComingFrom.None): InsertResult {
     let nodeCase: Case;
     let gaps: Interval[] = [];
+	interval = interval ?? new Interval(a, b)
     // Case 1
     if (
       interval.minVal >= this.interval.minVal &&
@@ -100,13 +113,16 @@ export class IntervalNode {
       interval.minVal <= this.interval.minVal
     ) {
       nodeCase = Case.Three;
-    } else {
+	  // Case 7
+    } else if (interval.maxVal == this.interval.maxVal && interval.minVal == this.interval.minVal) {
+	  nodeCase = Case.Seven
+	} else {
       throw `unhandled case, requested interval: ${interval}, current node interval: ${this.interval}`;
     }
 
     if (nodeCase === Case.Three || nodeCase === Case.Four) {
       const newInterval = new Interval(interval.minVal, this.interval.minVal);
-      const result = this.leftNode?.insert(newInterval, ComingFrom.Right);
+      const result = this.leftNode?.insert({interval: newInterval}, ComingFrom.Right);
       const coalescedResults = result?.gaps ?? [newInterval];
 
       if (result) {
@@ -122,14 +138,14 @@ export class IntervalNode {
           this.leftNode = result.furthest.leftNode;
         }
       } else {
-		this.interval.minVal = interval.minVal
-	  }
+        this.interval.minVal = interval.minVal;
+      }
       gaps = [...gaps, ...coalescedResults];
     }
 
     if (nodeCase === Case.Two || nodeCase === Case.Four) {
       const newInterval = new Interval(this.interval.maxVal, interval.maxVal);
-      const result = this.rightNode?.insert(newInterval, ComingFrom.Left);
+      const result = this.rightNode?.insert({interval: newInterval}, ComingFrom.Left);
       const coalescedResults = result?.gaps ?? [newInterval];
 
       if (result) {
@@ -145,33 +161,32 @@ export class IntervalNode {
           this.rightNode = result.furthest.rightNode;
         }
       } else {
-		this.interval.maxVal = interval.maxVal
-	  }
+        this.interval.maxVal = interval.maxVal;
+      }
       gaps = [...gaps, ...coalescedResults];
     }
 
     if (nodeCase === Case.Five) {
-      const result = this.rightNode?.insert(interval, comingFrom)
-	  const coalescedResults = result?.gaps ?? [interval]
+      const result = this.rightNode?.insert({interval}, comingFrom);
+      const coalescedResults = result?.gaps ?? [interval];
 
-	  if (!result && comingFrom !== ComingFrom.Right) {
-		this.rightNode = new IntervalNode(null, null, interval)
-	  }
-	  gaps = coalescedResults
+      if (!result && comingFrom !== ComingFrom.Right) {
+        this.rightNode = new IntervalNode({interval});
+      }
+      gaps = coalescedResults;
     } else if (nodeCase === Case.Six) {
-		const result = this.leftNode?.insert(interval, comingFrom)
-		const coalescedResults = result?.gaps ?? [interval]
-  
-		if (!result && comingFrom !== ComingFrom.Left) {
-		  this.leftNode = new IntervalNode(null, null, interval)
-		}
-		gaps = coalescedResults
+      const result = this.leftNode?.insert({interval}, comingFrom);
+      const coalescedResults = result?.gaps ?? [interval];
+
+      if (!result && comingFrom !== ComingFrom.Left) {
+        this.leftNode = new IntervalNode({interval});
+      }
+      gaps = coalescedResults;
     }
 
     return { case: nodeCase, gaps, furthest: this };
   }
 }
-
 
 // Printing debug code borrowed from geeks for geeks
 
