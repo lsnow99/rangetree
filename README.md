@@ -11,13 +11,13 @@ To run tests defined in `tests.ts`, do `npm test`
 
 ## Definition
 
-Definition: Suppose a range tree `rt` contains the set S of ranges where S = {[a<sup>1</sup><sub>low</sub>, a<sup>1</sup><sub>high</sub>], [a<sup>2</sup><sub>low</sub>, a<sup>2</sup><sub>high</sub>], ....}, where for all (i, j)∈[1, |S|] where (i ≠ j), it is true that S<sub>i</sub>∩S<sub>j</sub>=∅. In other words, all the ranges within S are non-overlapping.
+Definition: Suppose a range tree $\texttt{rt}$ contains the set $S$ of ranges where $S = \\{ [a^1_\text{low}, a^1_\text{high}], [a^2_\text{low}, a^2_\text{high}], \ldots \\} $, where for all $(i, j) \in [1, |S|]$ where $(i \neq j)$, it is true that $S_i \cap S_j = \varnothing$. In other words, all the ranges within $S$ are non-overlapping.
 
 `rt` must support the operation `insert([x, y])`:
 
-define S<sup>xy</sup> such that ∀(i) where i∈[1, |S<sup>xy</sup>|] it is true that S<sub>i</sub><sup>xy</sup>∈S and S<sub>i</sub><sup>xy</sup>∩[x, y] ≠ ∅. In other words, S<sup>xy</sup> is the set of all elements within S that have overlap with the requested range [x, y].
+define $S^{xy}$ such that $\forall i \in [1, |S^{xy}|]$ it is true that $S_i^{xy} \in S$ and $S_i^{xy} \cap [x, y] \neq \varnothing$. In other words, $S^{xy}$ is the set of all elements within $S$ that have overlap with the requested range $[x, y]$.
 
-define `insert` such that `insert([x, y])` returns set G of ranges such that [x, y] = G∪S<sup>xy</sup>, where G∩S = ∅. Also, after insert S = (S\S<sup>xy</sup>)∪{a, b} where a is the lowest bound of all ranges in G∪S<sup>xy</sup>, and b is the greatest bound of all ranges in G∪S<sup>xy</sup>. 
+define `insert` such that `insert([x, y])` returns set $G$ of ranges such that $[x, y] = G \cup S^{xy}$, where $G \cap S = \varnothing$. Also, after insert, $S = (S \setminus S^{xy}) \cup \\{a, b\\}$ where $a$ is the lowest bound of all ranges in $G \cup S^{xy}$, and $b$ is the greatest bound of all ranges in $G \cup S^{xy}$. 
 
 ## Examples
 Suppose the range tree currently holds the following intervals of integers before running each of the below queries: {[0, 10], [20, 30], [50, 70]}.
