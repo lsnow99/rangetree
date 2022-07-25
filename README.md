@@ -29,3 +29,28 @@ Suppose the range tree currently holds the following intervals of integers befor
 - Query 5: `insert([0, 100])` -> should return {[10, 20], [30, 50], [70, 100]}. The range tree now contains {[0, 100]}
 
 To run these examples, do `npm test`
+
+## Proof
+
+When performing an insert, we can consider the following cases at any given node of the tree:
+
+Suppose the node has an interval given by [a, b] and we are inserting [x, y]
+
+There are 6 cases:
+
+- Case 1: ---(---[---]---)---
+- Case 2: ---(---[---)---]---
+- Case 3: ---[---(---]---)---
+- Case 4: ---[---(---)---]---
+- Case 5: ---(---)---[---]---
+- Case 6: ---[---]---(---)---
+
+For coalescing:
+- Case 1: No coalescing performed
+- Case 2: Our node becomes [a, y]
+- Case 3: Our node becomes [x, b]
+- Case 4: Our node becomes [x, y]
+- Case 5: Our node stays the same
+- Case 6: Our node stays the same
+
+Correctness
