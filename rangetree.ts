@@ -3,9 +3,9 @@ export class Interval {
   maxVal: number;
 
   constructor(minVal: number, maxVal: number) {
-	if (minVal > maxVal) {
-		throw `min val > max val: ${minVal} > ${maxVal}`
-	}
+    if (minVal > maxVal) {
+      throw `min val > max val: ${minVal} > ${maxVal}`;
+    }
     this.minVal = minVal;
     this.maxVal = maxVal;
   }
@@ -32,7 +32,7 @@ enum Case {
   Four = 4,
   Five = 5,
   Six = 6,
-  Seven = 7
+  Seven = 7,
 }
 
 type InsertResult = {
@@ -42,25 +42,25 @@ type InsertResult = {
 };
 
 interface IntervalArgsWithInterval {
-	interval: Interval
-	a?: never
-	b?: never
+  interval: Interval;
+  a?: never;
+  b?: never;
 }
 
 interface IntervalArgsWithBounds {
-	a: number
-	b: number
-	interval?: never
+  a: number;
+  b: number;
+  interval?: never;
 }
 
-export type IntervalArgs = IntervalArgsWithInterval | IntervalArgsWithBounds
+export type IntervalArgs = IntervalArgsWithInterval | IntervalArgsWithBounds;
 
 export class IntervalNode {
   interval: Interval;
   leftNode: IntervalNode | null = null;
   rightNode: IntervalNode | null = null;
 
-  constructor({interval, a, b}: IntervalArgs) {
+  constructor({ interval, a, b }: IntervalArgs) {
     this.interval = interval ?? new Interval(a, b);
   }
 
@@ -73,10 +73,13 @@ export class IntervalNode {
     return true;
   }
 
-  insert({interval, a, b}: IntervalArgs, comingFrom = ComingFrom.None): InsertResult {
+  insert(
+    { interval, a, b }: IntervalArgs,
+    comingFrom = ComingFrom.None
+  ): InsertResult {
     let nodeCase: Case;
     let gaps: Interval[] = [];
-	interval = interval ?? new Interval(a, b)
+    interval = interval ?? new Interval(a, b);
     // Case 1
     if (
       interval.minVal >= this.interval.minVal &&
@@ -91,14 +94,14 @@ export class IntervalNode {
       nodeCase = Case.Four;
       // Case 6
     } else if (
-      interval.minVal <= this.interval.minVal &&
+      interval.minVal < this.interval.minVal &&
       interval.maxVal < this.interval.minVal
     ) {
       nodeCase = Case.Six;
       // Case 5
     } else if (
       interval.maxVal > this.interval.maxVal &&
-      interval.minVal >= this.interval.maxVal
+      interval.minVal > this.interval.maxVal
     ) {
       nodeCase = Case.Five;
       // Case 2
@@ -113,16 +116,24 @@ export class IntervalNode {
       interval.minVal <= this.interval.minVal
     ) {
       nodeCase = Case.Three;
-	  // Case 7
-    } else if (interval.maxVal == this.interval.maxVal && interval.minVal == this.interval.minVal) {
-	  nodeCase = Case.Seven
-	} else {
+      // Case 7
+    } else if (
+      interval.maxVal == this.interval.maxVal &&
+      interval.minVal == this.interval.minVal
+    ) {
+      nodeCase = Case.Seven;
+    } else {
       throw `unhandled case, requested interval: ${interval}, current node interval: ${this.interval}`;
     }
 
+    console.log('nodeCase: ', nodeCase)
+
     if (nodeCase === Case.Three || nodeCase === Case.Four) {
       const newInterval = new Interval(interval.minVal, this.interval.minVal);
-      const result = this.leftNode?.insert({interval: newInterval}, ComingFrom.Right);
+      const result = this.leftNode?.insert(
+        { interval: newInterval },
+        ComingFrom.Right
+      );
       const coalescedResults = result?.gaps ?? [newInterval];
 
       if (result) {
@@ -145,7 +156,10 @@ export class IntervalNode {
 
     if (nodeCase === Case.Two || nodeCase === Case.Four) {
       const newInterval = new Interval(this.interval.maxVal, interval.maxVal);
-      const result = this.rightNode?.insert({interval: newInterval}, ComingFrom.Left);
+      const result = this.rightNode?.insert(
+        { interval: newInterval },
+        ComingFrom.Left
+      );
       const coalescedResults = result?.gaps ?? [newInterval];
 
       if (result) {
@@ -167,19 +181,19 @@ export class IntervalNode {
     }
 
     if (nodeCase === Case.Five) {
-      const result = this.rightNode?.insert({interval}, comingFrom);
+      const result = this.rightNode?.insert({ interval }, comingFrom);
       const coalescedResults = result?.gaps ?? [interval];
 
       if (!result && comingFrom !== ComingFrom.Right) {
-        this.rightNode = new IntervalNode({interval});
+        this.rightNode = new IntervalNode({ interval });
       }
       gaps = coalescedResults;
     } else if (nodeCase === Case.Six) {
-      const result = this.leftNode?.insert({interval}, comingFrom);
+      const result = this.leftNode?.insert({ interval }, comingFrom);
       const coalescedResults = result?.gaps ?? [interval];
 
       if (!result && comingFrom !== ComingFrom.Left) {
-        this.leftNode = new IntervalNode({interval});
+        this.leftNode = new IntervalNode({ interval });
       }
       gaps = coalescedResults;
     }

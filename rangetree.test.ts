@@ -1,4 +1,5 @@
 import { Interval, IntervalArgs, IntervalNode } from "./rangetree";
+import { describe, expect, it } from "vitest";
 
 const verifyTrees = (testRoot: IntervalNode, expRoot: IntervalNode) => {
   expect(testRoot.interval.minVal).toBe(expRoot.interval.minVal);
@@ -73,56 +74,97 @@ const buildFull3LayerTree = (): ReturnType<typeof buildBasicTree> => {
   return [root, expTree, doInsert];
 };
 
-test("Build a few nodes and combine them all", () => {
-  const [_root, expTree, doInsert] = buildBasicTree();
+describe("Interval Basic", () => {
+  it.concurrent("Regular construction", () => {
+    const interval = new Interval(-10, 82)
+    expect(interval.minVal).toBe(-10)
+    expect(interval.maxVal).toBe(82)
+  })
+  it.concurrent("Bad input", () => {
+    expect(() => {new Interval(82, -10)}).toThrowError()
+  })
+  it.concurrent("Less than out of bounds", () => {
 
-  expTree.leftNode = null;
-  expTree.rightNode = null;
-  expTree.interval.minVal = -100;
-  expTree.interval.maxVal = 100;
-  doInsert(
-    { a: -100, b: 100 },
-    String([
-      new Interval(-100, -5),
-      new Interval(15, 25),
-      new Interval(30, 50),
-      new Interval(75, 100),
-    ])
-  );
+  })
+})
+
+describe.concurrent("Basic", () => {
+  it.concurrent("Build a few nodes and combine them all", () => {
+    const [_root, expTree, doInsert] = buildBasicTree();
+
+    expTree.leftNode = null;
+    expTree.rightNode = null;
+    expTree.interval.minVal = -100;
+    expTree.interval.maxVal = 100;
+    doInsert(
+      { a: -100, b: 100 },
+      String([
+        new Interval(-100, -5),
+        new Interval(15, 25),
+        new Interval(30, 50),
+        new Interval(75, 100),
+      ])
+    );
+  });
+  it.concurrent("Build a full tree 3 layers deep and combine one half", () => {
+    const [_root, expTree, doInsert] = buildFull3LayerTree();
+
+    expTree.interval.maxVal = 500;
+    expTree.rightNode = null;
+    doInsert(
+      { a: 5, b: 500 },
+      String([
+        new Interval(15, 17),
+        new Interval(18, 25),
+        new Interval(30, 50),
+        new Interval(75, 500),
+      ])
+    );
+  });
+  it.concurrent("Build a full tree 3 layers deep and combine a subtree", () => {
+    const [_root, expTree, doInsert] = buildFull3LayerTree();
+
+    expTree.rightNode!.interval.minVal = 16;
+    expTree.rightNode!.interval.maxVal = 500;
+    expTree.rightNode!.rightNode = null;
+    expTree.rightNode!.leftNode = null;
+    doInsert(
+      { a: 16, b: 500 },
+      String([
+        new Interval(16, 17),
+        new Interval(18, 25),
+        new Interval(30, 50),
+        new Interval(75, 500),
+      ])
+    );
+  });
 });
 
-test("Build a full tree 3 layers deep and combine one half", () => {
-  const [_root, expTree, doInsert] = buildFull3LayerTree();
+describe.concurrent("Bound edges", () => {
+  it.concurrent("Test maxval matching root minval", () => {
+    const [_root, expTree, doInsert] = buildBasicTree();
 
-  expTree.interval.maxVal = 500;
-  expTree.rightNode = null;
-  doInsert(
-    { a: 5, b: 500 },
-    String([
-      new Interval(15, 17),
-      new Interval(18, 25),
-      new Interval(30, 50),
-      new Interval(75, 500),
-    ])
-  );
-});
+    expTree.interval.minVal = -20
+    expTree.interval.maxVal = 15
+    doInsert(
+      {a: -20, b: -5},
+      String([
+        new Interval(-20, -5),
+      ])
+    )
+  })
 
-test("Build a full tree 3 layers deep and combine a subtree", () => {
-  const [_root, expTree, doInsert] = buildFull3LayerTree();
+  it.concurrent("Test minval matching root maxval", () => {
+    const [_root, expTree, doInsert] = buildBasicTree();
 
-  expTree.rightNode!.interval.minVal = 16;
-  expTree.rightNode!.interval.maxVal = 500;
-  expTree.rightNode!.rightNode = null;
-  expTree.rightNode!.leftNode = null;
-  doInsert(
-    { a: 16, b: 500 },
-    String([
-      new Interval(16, 17),
-      new Interval(18, 25),
-      new Interval(30, 50),
-      new Interval(75, 500),
-    ])
-  );
-});
-
-// TODO: test edge cases of boundaries
+    expTree.interval.minVal = -5
+    expTree.interval.maxVal = 30
+    expTree.rightNode = expTree.rightNode!.rightNode
+    doInsert(
+      {a: 15, b: 29},
+      String([
+        new Interval(15, 25)
+      ])
+    )
+  })
+})

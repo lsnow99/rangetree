@@ -1,3 +1,4 @@
 out/
 .pnpm-debug.log
 node_modules
+coverage
