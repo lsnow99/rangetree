@@ -1,5 +1,6 @@
 import { Interval, IntervalArgs, IntervalNode } from "./rangetree";
 import { describe, expect, it } from "vitest";
+import {fuzz, preset} from 'fuzzing';
 
 const verifyTrees = (testRoot: IntervalNode, expRoot: IntervalNode) => {
   expect(testRoot.interval.minVal).toBe(expRoot.interval.minVal);
@@ -166,5 +167,17 @@ describe.concurrent("Bound edges", () => {
         new Interval(15, 25)
       ])
     )
+  })
+})
+
+describe.concurrent("Fuzz", () => {
+  it.concurrent("Basic fuzz test", async () => {
+    const [tree] = buildBasicTree()
+    const doFuzz = (a: number, b: number) => {
+      if (a <= b)
+        tree.insert({a, b})
+    }
+    const errors = await fuzz(doFuzz).under(preset.number(), preset.number()).errors()
+    expect(errors).toEqual([])
   })
 })
