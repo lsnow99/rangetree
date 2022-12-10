@@ -10,10 +10,6 @@ export class Interval {
     this.maxVal = maxVal;
   }
 
-  contains(x: number) {
-    return this.minVal <= x && this.maxVal >= x;
-  }
-
   toString() {
     return `[${this.minVal}, ${this.maxVal}]`;
   }
@@ -32,7 +28,6 @@ enum Case {
   Four = 4,
   Five = 5,
   Six = 6,
-  Seven = 7,
 }
 
 type InsertResult = {
@@ -64,15 +59,6 @@ export class IntervalNode {
     this.interval = interval ?? new Interval(a, b);
   }
 
-  contains(x: number): boolean {
-    if (x < this.interval.minVal) {
-      return this.leftNode?.contains(x) ?? false;
-    } else if (x > this.interval.maxVal) {
-      return this.rightNode?.contains(x) ?? false;
-    }
-    return true;
-  }
-
   insert(
     { interval, a, b }: IntervalArgs,
     comingFrom = ComingFrom.None
@@ -83,7 +69,7 @@ export class IntervalNode {
     // Case 1
     if (
       interval.minVal >= this.interval.minVal &&
-      interval.maxVal < this.interval.maxVal
+      interval.maxVal <= this.interval.maxVal
     ) {
       nodeCase = Case.One;
       // Case 4
@@ -116,17 +102,9 @@ export class IntervalNode {
       interval.minVal <= this.interval.minVal
     ) {
       nodeCase = Case.Three;
-      // Case 7
-    } else if (
-      interval.maxVal == this.interval.maxVal &&
-      interval.minVal == this.interval.minVal
-    ) {
-      nodeCase = Case.Seven;
     } else {
       throw `unhandled case, requested interval: ${interval}, current node interval: ${this.interval}`;
     }
-
-    console.log('nodeCase: ', nodeCase)
 
     if (nodeCase === Case.Three || nodeCase === Case.Four) {
       const newInterval = new Interval(interval.minVal, this.interval.minVal);
@@ -202,31 +180,4 @@ export class IntervalNode {
   }
 }
 
-// Printing debug code borrowed from geeks for geeks
 
-let COUNT = 10;
-// Function to print binary tree in 2D
-// It does reverse inorder traversal
-export const print2DUtil = (
-  root: IntervalNode | null,
-  space = 0,
-  count = COUNT
-) => {
-  // Base case
-  if (root === null) return;
-
-  // Increase distance between levels
-  space += count;
-
-  // Process right child first
-  print2DUtil(root.rightNode, space);
-
-  // Print current node after space
-  // count
-  process.stdout.write("\n");
-  for (let i = count; i < space; i++) process.stdout.write("  ");
-  process.stdout.write(String(root.interval).padStart(8) + "\n");
-
-  // Process left child
-  print2DUtil(root.leftNode, space);
-};

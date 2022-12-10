@@ -139,6 +139,10 @@ describe.concurrent("Basic", () => {
       ])
     );
   });
+  it.concurrent("Build a tree", () => {
+    const [_root, expTree, doInsert] = buildFull3LayerTree();
+    
+  })
 });
 
 describe.concurrent("Bound edges", () => {
@@ -170,10 +174,36 @@ describe.concurrent("Bound edges", () => {
   })
 })
 
+describe.concurrent("Infinities", () => {
+  it.concurrent("Negative to positive infinity base", () => {
+    const [_root, expTree, doInsert] = buildBasicTree();
+    
+    expTree.leftNode = null
+    expTree.rightNode = null
+    expTree.interval.minVal = -Infinity
+    expTree.interval.maxVal = Infinity
+    doInsert({a: -Infinity, b: Infinity}, String([new Interval(-Infinity, -5), new Interval(15, 25), new Interval(30, 50), new Interval(75, Infinity)]))
+    doInsert({a: 1, b: 2}, String([]))
+    doInsert({a: 1, b: Infinity}, String([]))    
+  })
+})
+
 describe.concurrent("Fuzz", () => {
   it.concurrent("Basic fuzz test", async () => {
+    // This test keeps using the same tree for every insert, but that quickly turns our tree into [-Infinity, Infinity)
     const [tree] = buildBasicTree()
     const doFuzz = (a: number, b: number) => {
+      if (a <= b)
+        tree.insert({a, b})
+    }
+    const errors = await fuzz(doFuzz).under(preset.number(), preset.number()).errors()
+    expect(errors).toEqual([])
+  })
+
+  it.concurrent("Basic fuzz test", async () => {
+    // This test uses a new tree for every insert
+    const doFuzz = (a: number, b: number) => {
+      const [tree] = buildBasicTree()
       if (a <= b)
         tree.insert({a, b})
     }
