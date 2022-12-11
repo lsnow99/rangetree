@@ -32,16 +32,16 @@ Suppose the range tree currently holds the following intervals of integers befor
 
 When performing an insert, we can consider the following cases at any given node of the tree:
 
-Suppose the node has an interval given by [a, b] and we are inserting [x, y]
+Suppose the node has an interval given by {a, b} and we are inserting [x, y]
 
 There are 6 cases:
 
-- Case 1: ---(---[---]---)---
-- Case 2: ---(---[---)---]---
-- Case 3: ---[---(---]---)---
-- Case 4: ---[---(---)---]---
-- Case 5: ---(---)---[---]---
-- Case 6: ---[---]---(---)---
+- Case 1: ---{---[---]---}---
+- Case 2: ---{---[---}---]---
+- Case 3: ---[---{---]---}---
+- Case 4: ---[---{---}---]---
+- Case 5: ---{---}---[---]---
+- Case 6: ---[---]---{---}---
 
 For coalescing:
 - Case 1: No coalescing performed
