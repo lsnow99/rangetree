@@ -164,6 +164,12 @@ export class IntervalNode {
 
       if (!result && comingFrom !== ComingFrom.Right) {
         this.rightNode = new IntervalNode({ interval });
+      } else if (
+        result &&
+        comingFrom === ComingFrom.Right &&
+        result.case !== Case.Five
+      ) {
+        this.rightNode = null;
       }
       gaps = coalescedResults;
     } else if (nodeCase === Case.Six) {
@@ -172,6 +178,12 @@ export class IntervalNode {
 
       if (!result && comingFrom !== ComingFrom.Left) {
         this.leftNode = new IntervalNode({ interval });
+      } else if (
+        result &&
+        comingFrom === ComingFrom.Left &&
+        result.case !== Case.Six
+      ) {
+        this.leftNode = null;
       }
       gaps = coalescedResults;
     }
@@ -179,5 +191,3 @@ export class IntervalNode {
     return { case: nodeCase, gaps, furthest: this };
   }
 }
-
-
